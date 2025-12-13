@@ -1,0 +1,7 @@
+{
+  "name": "GoRider",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
