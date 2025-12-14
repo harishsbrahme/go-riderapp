@@ -1,17 +1,353 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Tab 1
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
+<!-- Force Update v3 -->
+<ion-content [fullscreen]="true" class="bg-light"
+  [class.no-scroll]="activeDeliveries.length > 0 && (activeDeliveries[0].state === 'navigating' || activeDeliveries[0].state === 'verifying')">
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 1</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <!-- HEADER (Only allow if NOT navigating/verifying) -->
+  <div class="custom-header ion-padding"
+    *ngIf="!(activeDeliveries.length > 0 && (activeDeliveries[0].state === 'navigating' || activeDeliveries[0].state === 'verifying'))">
+    <div class="profile-row">
+      <div class="user-info">
+        <div class="avatar-circle">
+          <img [src]="user.avatar" alt="avatar" />
+        </div>
+        <div class="text">
+          <p class="greeting">GOOD MORNING</p>
+          <h2 class="name">{{ user.name }}</h2>
+        </div>
+        <ion-button fill="clear" size="small" class="notification-btn">
+          <div class="badge-count">2</div>
+          <ion-icon name="notifications-outline"></ion-icon>
+        </ion-button>
+      </div>
+    </div>
 
-  <app-explore-container name="Tab 1 page"></app-explore-container>
+    <!-- Status & Stats & Segment (Only show if on main dashboard view) -->
+    <ng-container *ngIf="activeTab === 'available' || (activeTab === 'active' && activeDeliveries.length === 0)">
+      <div class="status-card">
+        <div class="status-text">
+          <div class="indicator" [class.online]="user.isOnline"></div>
+          <div class="labels">
+            <h3>You are {{ user.isOnline ? 'Online' : 'Offline' }}</h3>
+            <p>Visible for new orders nearby.</p>
+          </div>
+        </div>
+        <ion-toggle [(ngModel)]="user.isOnline" mode="ios" color="warning"></ion-toggle>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-item">
+          <h1>${{ stats.earned | number:'1.2-2' }}</h1>
+          <p>EARNED</p>
+        </div>
+        <div class="stat-item">
+          <h1>{{ stats.rating }}</h1>
+          <p>⭐️ RATING</p>
+        </div>
+        <div class="stat-item">
+          <h1>{{ stats.trips }}</h1>
+          <p>TRIPS</p>
+        </div>
+      </div>
+    </ng-container>
+
+    <div class="segment-container" *ngIf="!((activeTab === 'active' && activeDeliveries.length > 0))">
+      <!-- Hide segment if we have an active delivery to focus on task -->
+      <div class="segment-btn" [class.active]="activeTab === 'available'" (click)="activeTab = 'available'">
+        Available Orders
+      </div>
+      <div class="segment-btn" [class.active]="activeTab === 'active'" (click)="activeTab = 'active'">
+        Active Delivery
+      </div>
+    </div>
+  </div>
+
+  <div class="list-section ion-padding-horizontal">
+
+    <!-- 1. AVAILABLE ORDERS -->
+    <ng-container *ngIf="activeTab === 'available'">
+      <div class="section-header">
+        <h3>New Opportunities <span class="count">({{ deliveries.length }})</span></h3>
+        <ion-button fill="clear" size="small" color="warning">View Map</ion-button>
+      </div>
+
+      <div class="order-card" *ngFor="let delivery of deliveries">
+        <div class="card-header-row">
+          <div class="price">
+            <h1>${{ delivery.earning | number:'1.2-2' }}</h1>
+            <p>Est. Earning</p>
+          </div>
+          <div class="meta-badges">
+            <span class="badge"><ion-icon name="navigate"></ion-icon> {{ delivery.distance }}</span>
+            <span class="badge"><ion-icon name="time"></ion-icon> {{ delivery.duration }}</span>
+          </div>
+        </div>
+        <div class="route-map">
+          <div class="steps">
+            <div class="step">
+              <div class="dot green"></div>
+              <div class="info">
+                <h4>{{ delivery.restaurantName }}</h4>
+                <p>{{ delivery.restaurantAddress }}</p>
+              </div>
+            </div>
+            <div class="line-container">
+              <div class="line"></div>
+            </div>
+            <div class="step">
+              <div class="dot red"></div>
+              <div class="info">
+                <h4>{{ delivery.customerName }}</h4>
+                <p>{{ delivery.customerAddress }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <ion-button expand="block" class="accept-btn" (click)="acceptOrder(delivery)">
+          Accept Order <ion-icon name="arrow-forward" slot="end"></ion-icon>
+        </ion-button>
+      </div>
+      <div *ngIf="deliveries.length === 0" class="empty-state">
+        <p>No new orders available.</p>
+      </div>
+    </ng-container>
+
+    <!-- 2. ACTIVE DELIVERY -->
+    <ng-container *ngIf="activeTab === 'active'">
+      <div *ngFor="let delivery of activeDeliveries">
+
+        <!-- STATE: ACCEPTED (Needs Upload) -->
+        <div class="order-card active-card" *ngIf="delivery.state === 'active'">
+          <div class="active-header">
+            <ion-chip color="primary" mode="ios" outline="true">
+              <ion-label>In Progress</ion-label>
+            </ion-chip>
+            <span class="order-id">Order #{{ delivery.id }}</span>
+          </div>
+          <div class="upload-section">
+            <p class="section-title">Step 1: Pickup Proof</p>
+            <div class="upload-box" (click)="fileInput.click()">
+              <ion-icon name="camera-outline"></ion-icon>
+              <p>Tap to upload pickup photo</p>
+            </div>
+            <input #fileInput type="file" (change)="onFileSelected($event, delivery)" accept="image/*" hidden />
+          </div>
+        </div>
+
+        <!-- STATE: PICKED UP (En Route View) -->
+        <div class="en-route-view" *ngIf="delivery.state === 'pickedUp'">
+
+          <!-- Top Header for Task -->
+          <div class="task-header">
+            <ion-icon name="menu-outline" size="large"></ion-icon>
+            <h2>Current Task</h2>
+            <ion-icon name="help-circle-outline" size="large"></ion-icon>
+          </div>
+
+          <div class="status-pill text-center">
+            <span class="dot"></span> EN ROUTE TO DROP-OFF
+          </div>
+
+          <!-- Customer Card -->
+          <div class="customer-card">
+            <div class="yellow-bar"></div>
+            <div class="content">
+              <div class="top-row">
+                <div>
+                  <p class="role-label">Customer</p>
+                  <h2 class="c-name">{{ delivery.customerName }}</h2>
+                  <div class="order-badges">
+                    <span class="oid">ORDER #{{ delivery.id }}</span>
+                    <span class="cod">CASH ON DELIVERY</span>
+                  </div>
+                </div>
+                <img [src]="delivery.customerAvatar || 'assets/user-avatar.png'" class="c-avatar" />
+              </div>
+              <div class="actions-row">
+                <ion-button class="action-btn" fill="outline" color="dark">
+                  <ion-icon name="call-outline" slot="start"></ion-icon> Call
+                </ion-button>
+                <ion-button class="action-btn" fill="outline" color="dark">
+                  <ion-icon name="chatbubble-outline" slot="start"></ion-icon> Message
+                </ion-button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Route Card -->
+          <div class="route-progress-card">
+            <div class="step completed">
+              <div class="icon-box"><ion-icon name="checkmark"></ion-icon></div>
+              <div class="info">
+                <p class="label">PICKUP COMPLETED</p>
+                <h4>{{ delivery.restaurantName }}</h4>
+                <p class="addr">{{ delivery.restaurantAddress }}</p>
+              </div>
+            </div>
+            <div class="step current">
+              <div class="icon-box"><ion-icon name="location"></ion-icon></div>
+              <div class="info">
+                <p class="label highlight">DROP-OFF DESTINATION</p>
+                <h4>{{ delivery.customerAddress.split(',')[0] }}</h4> <!-- Simplified -->
+                <p class="addr">{{ delivery.customerAddress }}</p>
+
+                <ion-chip color="warning" class="bell-chip">
+                  <ion-icon name="notifications"></ion-icon> Ring doorbell
+                </ion-chip>
+              </div>
+            </div>
+          </div>
+
+          <!-- Order Details -->
+          <div class="order-details-card">
+            <div class="od-header">
+              <h4>Order Details</h4>
+              <span>{{ delivery.items?.length || 0 }} Items</span>
+            </div>
+            <div class="item-list">
+              <div class="item" *ngFor="let item of delivery.items">
+                <span class="qty">{{ item.qty }}x</span>
+                <span class="name">{{ item.name }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Floating Bottom Bar -->
+          <div class="floating-nav-bar two-buttons">
+            <div class="nav-btn-green" (click)="requestCompletion(delivery)">
+              <ion-icon name="checkmark-circle"></ion-icon> Complete Delivery
+            </div>
+            <div class="start-btn mini" (click)="startNavigation(delivery)">
+              <div class="lbl">Navigate</div>
+              <div class="go-icon"><ion-icon name="navigate"></ion-icon></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- STATE: NAVIGATING (Map View) -->
+        <div class="map-view-fullscreen" *ngIf="delivery.state === 'navigating'">
+          <!-- (Same as before) -->
+          <div class="map-header-overlay">
+            <div class="info-pill">
+              <div class="time">
+                <span class="val">{{ delivery.duration.split(' ')[0] }}</span> min
+                <span class="lbl">ETA</span>
+              </div>
+              <div class="sep"></div>
+              <div class="dist">
+                <span class="val">{{ delivery.distance.split(' ')[0] }}</span> km
+                <span class="lbl">DISTANCE</span>
+              </div>
+            </div>
+            <div class="dest-badge">Drop-off <ion-icon name="location"></ion-icon></div>
+          </div>
+          <div class="map-container">
+            <img src="https://i.ibb.co/3Wgj3Zg/map-placeholder-yellow.png" alt="Map Route" class="map-img-bg" />
+            <div class="map-fallback"></div>
+          </div>
+          <div class="map-controls">
+            <ion-button class="zoom-btn" size="small"><ion-icon name="add"></ion-icon></ion-button>
+            <ion-button class="zoom-btn" size="small"><ion-icon name="remove"></ion-icon></ion-button>
+            <ion-button class="center-btn" size="small"><ion-icon name="compass"></ion-icon></ion-button>
+          </div>
+          <div class="map-footer-overlay">
+            <ion-button class="recenter" fill="light" shape="round"><ion-icon name="locate"></ion-icon></ion-button>
+            <button class="back-btn-yellow" (click)="stopNavigation(delivery)">
+              <ion-icon name="arrow-back"></ion-icon> Back to Order Details
+            </button>
+          </div>
+        </div>
+
+        <!-- STATE: VERIFYING (OTP & Completion) -->
+        <div class="otp-view-fullscreen" *ngIf="delivery.state === 'verifying'">
+
+          <!-- Header -->
+          <div class="otp-header">
+            <ion-button fill="clear" color="dark" (click)="cancelVerification(delivery)">
+              <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+            </ion-button>
+            <h2>Delivery Completion</h2>
+            <span class="help-text">HELP</span>
+          </div>
+
+          <div class="content-centered">
+
+            <!-- Status Circle -->
+            <div class="status-circle-green">
+              <ion-icon name="checkmark"></ion-icon>
+            </div>
+
+            <h1 class="main-title">Arrival Confirmed</h1>
+            <p class="sub-title">Ask customer for the 4-digit PIN</p>
+
+            <!-- Simple Customer Info -->
+            <div class="otp-customer-card">
+              <div class="icon-circle"><ion-icon name="map"></ion-icon></div>
+              <div class="info">
+                <h4>{{ delivery.customerAddress.split(',')[0] }}</h4>
+                <p>{{ delivery.customerAddress.split(',')[1] }} • {{ delivery.customerName }}</p>
+              </div>
+              <ion-button fill="clear" color="dark" class="phone-btn">
+                <ion-icon name="call" slot="icon-only"></ion-icon>
+              </ion-button>
+            </div>
+
+            <!-- PIN Inputs Display -->
+            <div class="pin-display">
+              <div class="pin-box" [class.filled]="enteredOtp.length >= 1" [class.active]="enteredOtp.length === 0">{{
+                enteredOtp[0] }}</div>
+              <div class="pin-box" [class.filled]="enteredOtp.length >= 2" [class.active]="enteredOtp.length === 1">{{
+                enteredOtp[1] }}</div>
+              <div class="pin-box" [class.filled]="enteredOtp.length >= 3" [class.active]="enteredOtp.length === 2">{{
+                enteredOtp[2] }}</div>
+              <div class="pin-box" [class.filled]="enteredOtp.length >= 4" [class.active]="enteredOtp.length === 3">{{
+                enteredOtp[3] }}</div>
+            </div>
+
+            <!-- Numpad -->
+            <div class="numpad-container">
+              <div class="row">
+                <div class="key" (click)="onDigitPress(1)">1</div>
+                <div class="key" (click)="onDigitPress(2)">2</div>
+                <div class="key" (click)="onDigitPress(3)">3</div>
+              </div>
+              <div class="row">
+                <div class="key" (click)="onDigitPress(4)">4</div>
+                <div class="key" (click)="onDigitPress(5)">5</div>
+                <div class="key" (click)="onDigitPress(6)">6</div>
+              </div>
+              <div class="row">
+                <div class="key" (click)="onDigitPress(7)">7</div>
+                <div class="key" (click)="onDigitPress(8)">8</div>
+                <div class="key" (click)="onDigitPress(9)">9</div>
+              </div>
+              <div class="row">
+                <div class="key text-key" (click)="onClearPress()">Clear</div>
+                <div class="key" (click)="onDigitPress(0)">0</div>
+                <div class="key icon-key" (click)="onBackspacePress()"><ion-icon name="backspace"></ion-icon></div>
+              </div>
+            </div>
+
+            <!-- Confirm Button -->
+            <ion-button expand="block" class="verify-btn" (click)="verifyAndComplete(delivery)"
+              [disabled]="enteredOtp.length < 4">
+              VERIFY & COMPLETE <ion-icon name="arrow-forward" slot="end"></ion-icon>
+            </ion-button>
+
+            <p class="footer-help">Customer Unavailable?</p>
+
+          </div>
+        </div>
+
+      </div>
+
+      <div *ngIf="activeDeliveries.length === 0" class="empty-state">
+        <p>You have no active deliveries.</p>
+      </div>
+    </ng-container>
+
+  </div>
+
+  <div class="spacer-bottom"></div>
+
 </ion-content>

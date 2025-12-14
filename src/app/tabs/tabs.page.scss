@@ -1,1 +1,40 @@
+.custom-tab-bar {
+    --background: #1a1a1a;
+    --border: none;
+    --color: #666;
+    --color-selected: #FFEE00;
 
+    margin: 16px;
+    border-radius: 25px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    height: 65px;
+    padding-bottom: 0px; // remove safe area padding if affecting centering
+
+    ion-tab-button {
+        --background: transparent;
+        --color: #777;
+        --color-selected: #FFEE00;
+
+        &.tab-selected {
+            ion-icon {
+                transform: translateY(-2px);
+            }
+
+            ion-label {
+                font-weight: 700;
+            }
+        }
+
+        ion-icon {
+            font-size: 1.4rem;
+            margin-bottom: 4px;
+            transition: all 0.2s;
+        }
+
+        ion-label {
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+    }
+}
