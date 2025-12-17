@@ -9,12 +9,12 @@
       <div class="form-group">
         <ion-item class="custom-input" lines="none">
           <ion-icon slot="start" name="mail-outline"></ion-icon>
-          <ion-input label="Email" labelPlacement="floating" type="email" placeholder="hello@example.com"></ion-input>
+          <ion-input label="Email" labelPlacement="floating" type="text" placeholder="hello@example.com" [(ngModel)]="userName"></ion-input>
         </ion-item>
         
         <ion-item class="custom-input" lines="none">
           <ion-icon slot="start" name="lock-closed-outline"></ion-icon>
-          <ion-input label="Password" labelPlacement="floating" type="password" placeholder="••••••••"></ion-input>
+          <ion-input label="Password" labelPlacement="floating" type="password" placeholder="••••••••" [(ngModel)]="password"></ion-input>
         </ion-item>
 
         <div class="forgot-password">
