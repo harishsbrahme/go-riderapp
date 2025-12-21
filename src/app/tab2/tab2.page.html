@@ -1,21 +1,73 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Earnings
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Earnings</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <div class="profile-container">
 
-  <div
-    style="display: flex; height: 100%; align-items: center; justify-content: center; flex-direction: column; color: #888;">
-    <ion-icon name="wallet-outline" style="font-size: 64px; margin-bottom: 20px;"></ion-icon>
-    <h2>Earnings - Coming Soon</h2>
+    <div class="header-section">
+      <h1>My Profile</h1>
+      <p>Manage your account</p>
+    </div>
+
+    <div class="profile-card">
+      <div class="avatar-row">
+        <div class="avatar-circle">
+          <ion-icon name="person"></ion-icon>
+        </div>
+        <div class="info">
+          <h2>{{ user.Name || 'User Name' }}</h2>
+          <p class="role">Delivery Partner</p>
+          <span class="badge">{{ user.UserName || 'ID: --' }}</span>
+        </div>
+      </div>
+
+      <div class="details-list">
+        <div class="item">
+          <div class="icon-box">
+            <ion-icon name="moon-outline"></ion-icon>
+          </div>
+          <div class="text">
+            <label>Theme</label>
+            <div style="display: flex; align-items: center; justify-content: space-between; padding-right: 10px;">
+              <h4 style="margin:0;">Dark Mode</h4>
+              <ion-toggle [checked]="isDarkMode" (ionChange)="toggleTheme($event)" color="dark"></ion-toggle>
+            </div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="icon-box">
+            <ion-icon name="call-outline"></ion-icon>
+          </div>
+          <div class="text">
+            <label>Mobile Number</label>
+            <h4>{{ user.MobileNo || '--' }}</h4>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="icon-box">
+            <ion-icon name="mail-outline"></ion-icon>
+          </div>
+          <div class="text">
+            <label>Email Address</label>
+            <h4>{{ user.Email || '--' }}</h4>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="icon-box">
+            <ion-icon name="location-outline"></ion-icon>
+          </div>
+          <div class="text">
+            <label>Location</label>
+            <h4>{{ user.City || 'City' }} - {{ user.Pincode || '000000' }}</h4>
+            <p>{{ user.Address }}</p>
+          </div>
+        </div>
+      </div>
+
+      <ion-button expand="block" class="logout-btn" (click)="logout()">
+        <ion-icon name="log-out-outline" slot="start"></ion-icon> Logout
+      </ion-button>
+    </div>
+
   </div>
 </ion-content>

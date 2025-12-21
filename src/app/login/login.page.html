@@ -2,48 +2,45 @@
   <div class="login-container">
     <div class="login-card">
       <div class="header">
+        <div class="logo-box">
+          <ion-icon name="bicycle"></ion-icon>
+        </div>
         <h1>Welcome Back</h1>
         <p>Sign in to continue to GoRider</p>
       </div>
 
       <div class="form-group">
-        <ion-item class="custom-input" lines="none">
-          <ion-icon slot="start" name="mail-outline"></ion-icon>
-          <ion-input label="Email" labelPlacement="floating" type="text" placeholder="hello@example.com" [(ngModel)]="userName"></ion-input>
-        </ion-item>
-        
-        <ion-item class="custom-input" lines="none">
-          <ion-icon slot="start" name="lock-closed-outline"></ion-icon>
-          <ion-input label="Password" labelPlacement="floating" type="password" placeholder="••••••••" [(ngModel)]="password"></ion-input>
-        </ion-item>
-
-        <div class="forgot-password">
-          <a>Forgot Password?</a>
+        <div class="custom-input-group">
+          <ion-label>Username</ion-label>
+          <div class="input-wrapper">
+            <ion-icon name="person-outline"></ion-icon>
+            <ion-input type="text" placeholder="Username" [(ngModel)]="userName"></ion-input>
+          </div>
         </div>
+
+        <div class="custom-input-group">
+          <ion-label>Password</ion-label>
+          <div class="input-wrapper">
+            <ion-icon name="lock-closed-outline"></ion-icon>
+            <ion-input type="password" placeholder="••••••••" [(ngModel)]="password"></ion-input>
+            <ion-icon name="eye-off-outline" class="eye-icon"></ion-icon>
+          </div>
+        </div>
+
+
       </div>
 
       <div class="actions">
         <ion-button expand="block" shape="round" class="login-auth-btn" (click)="login()">
-          Log In
+          Log In <ion-icon name="arrow-forward" slot="end"></ion-icon>
         </ion-button>
-        
-        <div class="divider">
-          <span>OR</span>
-        </div>
 
-        <div class="social-login">
-          <ion-button fill="outline" shape="round">
-            <ion-icon slot="icon-only" name="logo-google"></ion-icon>
-          </ion-button>
-          <ion-button fill="outline" shape="round">
-            <ion-icon slot="icon-only" name="logo-apple"></ion-icon>
-          </ion-button>
-        </div>
+
+
+
       </div>
 
-      <div class="signup-link">
-        <p>Don't have an account? <a>Sign up</a></p>
-      </div>
+
     </div>
   </div>
 </ion-content>

@@ -35,17 +35,18 @@
       </div>
 
       <div class="stats-row">
-        <div class="stat-item">
-          <h1>${{ stats.earned | number:'1.2-2' }}</h1>
-          <p>EARNED</p>
+        <div class="stat-item" (click)="onStatClick('assigned')" [class.selected-stat]="selectedFilter === 'assigned'">
+          <h1>{{ stats.assigned }}</h1>
+          <p>ASSIGNED</p>
         </div>
-        <div class="stat-item">
-          <h1>{{ stats.rating }}</h1>
-          <p>⭐️ RATING</p>
+        <div class="stat-item" (click)="onStatClick('pending')" [class.selected-stat]="selectedFilter === 'pending'">
+          <h1>{{ stats.inscan }}</h1>
+          <p>PENDING</p>
         </div>
-        <div class="stat-item">
+        <div class="stat-item" (click)="onStatClick('delivered')"
+          [class.selected-stat]="selectedFilter === 'delivered'">
           <h1>{{ stats.trips }}</h1>
-          <p>TRIPS</p>
+          <p>DELIVERED</p>
         </div>
       </div>
     </ng-container>

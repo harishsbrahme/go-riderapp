@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-
 import { Router } from '@angular/router';
 import { ApiMainService } from '../services/api-main-service';
 
@@ -7,28 +6,30 @@ import { ApiMainService } from '../services/api-main-service';
   selector: 'app-login',
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
-  standalone:false
+  standalone: false
 })
 export class LoginPage implements OnInit {
-userName='';
-password='';
-  constructor(private router: Router,
+  userName = '';
+  password = '';
+
+  constructor(
+    private router: Router,
     public apiService: ApiMainService
   ) { }
 
-  ngOnInit() {
-  }
+  ngOnInit() { }
 
   login() {
-    console.log(this.userName,this.password);
-    // this.router.navigate(['/tabs']);
-    
+    if (!this.userName || !this.password) {
+      return;
+    }
+
     this.apiService.dpLogin(this.userName, this.password).subscribe({
-      next: (res:any) => {
+      next: (res: any) => {
         console.log('Login Success:', res);
         this.router.navigate(['/tabs']);
       },
-      error: (err:any) => {
+      error: (err: any) => {
         console.error('Login Error:', err);
       }
     });
